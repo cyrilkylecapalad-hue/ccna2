@@ -246,18 +246,18 @@ ephone-dn 7
 ephone-dn 8
   number 9288
  ephone-dn 9
-   number 9299
+   number 9267
 ephone-dn 10
- number 9298
+ number 9223
 Ephone 1
-  Mac-address cafe.face.baba
+  Mac-address ccd8.c1fb.1103
   type 8945
-  button 1:8 2:7 3:6 4:5
+  button 1:8 2:7 3:6 4:9
   restart
 Ephone 2
-  Mac-address fafa.caca.baba
+  Mac-address ccd8.c1fb.16f3
   type 8945
-  button 1:4 2:3 3:2 4:1
+  button 1:4 2:3 3:2 4:10
   restart  
 end
 
@@ -288,10 +288,10 @@ configure terminal
  destination-pattern 11..
  session target ipv4:10.11.100.8
  codec g711ULAW
-  !dial-peer voice 12 Voip
-  !destination-pattern 12..
-  !session target ipv4:10.12.100.8
-  !codec g711ULAW
+  dial-peer voice 12 Voip
+  destination-pattern 12..
+  !ession target ipv4:10.12.100.8
+  codec g711ULAW
 dial-peer voice 21 Voip
  destination-pattern 21..
  session target ipv4:10.21.100.8
@@ -353,9 +353,9 @@ dial-peer voice 91 Voip
  session target ipv4:10.91.100.8
  codec g711ULAW
 dial-peer voice 92 Voip
- destination-pattern 92..
- session target ipv4:10.92.100.8
- codec g711ULAW
+ !destination-pattern 92..
+ !session target ipv4:10.92.100.8
+ !codec g711ULAW
 
 TASK3***TASK3***TASK3***
 TASK3***TASK3***TASK3***
