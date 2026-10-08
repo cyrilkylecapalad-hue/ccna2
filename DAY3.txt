@@ -1,0 +1,285 @@
+!@CoreBABA
+conf t
+ hostname CoreBABA-92
+ ip routing
+ int fa0/9
+	no sw
+	ip add 10.100.69.118 255.255.255.252
+end
+
+----3RD DAY---
+TASK 1 find the network
+1. 10.100.69.122 = /30
+STEP 1: /30 (4th, 4i)
+STEP 2: any number lower divisible by i which is 116, 120, 124
+STEP 3: sino sasalo
+
+2. 10.15.201.72 /27
+STEP 1: /27 (4th, 32i)
+STEP 2: 10.15.201.64
+
+3. 192.167.115.15 / 21
+STEP 1 /21 (3rd, 8i)
+192.167.112.0 /21
+become 0 give network
+
+4. 172.16.1.214 /25
+STEP /25 (4th,128i)
+172.16.1.128 /25
+
+---------ROUTING-------
+if host net = .1
+cmd: tracert -d 8.8.8.8 / 1.1.1.1 
+Config IP for Static Routes
+!@Cisco
+conf t
+ ip route [destination] [mask][next-hop/exit int]
+exit
+--Configure a [static]/32 host route destined to 10.1.1.5 on R1---
+!@Cisco
+conf t
+ ip route 10.1.1.5 255.255.255.255 10.1.1.12
+end
+
+conf t
+ ip route 10.1.1.6 255.255.255.255 10.1.1.2
+end
+
+conf t
+no to delete
+ ip route 10.1.1.1 255.255.255.255 10.1.1.5
+end
+---RETURN TRAFFIC -----
+---r1 to r4 & r4 to r1 ---
+
+conf t
+ ip route 10.1.1.8 255.255.255.252 10.1.1.2
+end
+ping 10.1.1.10
+@R4 to r1
+conf t
+ ip route 10.1.1.0 255.255.255.252 10.1.1.9
+end
+ping 10.1.1.1
+no to delete
+
+-- Every Device needs to know where Destination --- cmd command netstat -r / route print ** cd /
+@R2
+conf t
+	ip route 10.1.1.8 255.255.255.252 10.1.1.6
+end
+
+--ROUTE PATH SELECT---
+longest prefix match ---
+
+
+--DYNAMIC ROUTING ---
+IGP - Link-State(OSPF,ISIS)
+    - Distance Vector (EIGRP, RIP)
+EGO
+    - BGP
+***if diff [OSPF] if both CISCO - [EIGRP]**
+
+=== Configure EIGRP ==
+Step 1 - Find the Connected Networks
+D1
+- 10.2.1.0 /24
+- 10.2.2.0 /24
+- 192.168.1.128 /27
+- 10.1.4.4 /30
+
+!@C1/D1
+conf t
+	router eigrp 100
+	network 10.2.1.0 0.0.0.255 <>>>>WILDCARD<<
+	network 10.2.2.0 0.0.0.255
+	network 192.168.1.128 0.0.0.31
+	network 10.1.4.4 0.0.0.3
+	end
+
+/27 determine octet and minus 1 I <<--- to  determine wildcard\
+
+!@C2/D@
+conf t 
+	router eigrp 100
+	network 10.2.1.2 0.0.0.255
+	network 10.2.2.2 0.0.0.255
+	network 192.168.1.128 0.0.0.31
+	network 10.1.4.8 0.0.0.3
+end
+@R4
+conf t
+router eigrp 100
+	network 10.1.4.4 0.0.0.3
+
+	network 10.1.4.8 0.0.0.3
+
+	end
+
+HOW TO CONFIGURE OSPF----
+!@R3
+conf t
+	router ospf 1
+	router-id 3.3.3.3
+	network 3.3.3.3 0.0.0.0 area 0
+	network 10.1.1.4 0.0.0.3 area 0
+	network 10.1.1.8 0.0.0.3 area 34
+end
+
+!@R4
+conf t
+	router ospf 1
+	router-id 4.4.4.4
+	network 4.4.4.4 0.0.0.0 area 34
+	network 10.1.1.8 0.0.0.3 area 34
+	
+end
+R@
+conf t
+ router ospf 1
+  router-id 2.2.2.2
+  network 2.2.2.2 0.0.0.0 area 0
+  network 10.1.1.0 0.0.0.3 area 12
+  network 10.1.1.4 0.0.0.3 area 0
+  end
+
+ANOTHER VERSION OSPF*****
+
+!@R1
+conf t
+ router ospf 1
+  router-id 1.1.1.1
+  exit
+ int lo1
+  ip ospf 1 area 12
+  exit
+ int e1/0
+  ip ospf 1 area 12
+  end
+
+---
+
+
+
+
+    
+verify 
+@R1 ping 10.1.1.10
+
+
+OSPF ROUTERS - VALUE
+-NETWORK TYPE BROADCAST
+-router id
+-authentication type same
+-subnet mask same
+-area same
+-Hello Timer : 10
+-Dead Timer : 40 seconds - default
+show ospf int e1/2 
+
+----OSPF STATES ------
+D DOWN
+I INIT
+T TWO WAY
+E EXSTART
+E EXCHANGE
+L LOADING
+F FULL
+
+1 P TO P - determine if only 2 no election
+and 1 DR OTHER - 
+
+ANSWER
+!@P1
+conf t
+ip route 0.0.0.0  0.0.0.0 10.2.1.2
+end
+USE IP ROUTE TO CONNECT 
+
+Static routing and Configuration SIM
+
+HOST Routes /32
+Looback R3 to R1
+IP 209.165.200.230
+First Config is R3
+@R3
+conf t
+ip route 192.168.1.1 255.255.255.255 209.165.200.229
+end
+@R2
+conf t
+ip route 192.168.1.1 255.255.255.255 209.165.200.225
+end
+@R1
+conf t
+ip route 209.165.200.230 255.255.255.252 209.165.200.226
+end
+
+OSPF - B AND DELA
+EIGRP - BANDWITH
+
+
+config T
+ router eigrp 100 ====papasok si ospf kay eigrp
+  redistribute ospf 1 metric 10000 100 255 1 1500
+  exit
+ router ospf 1
+  redistribute eigrp 100 subnets
+end
+
+
+show ip route eigrp
+
+Path Selection :
+1. Longest Prefix
+2. Admin Distance
+3. Metric 
+
+C=0 
+S= 1
+B= 20
+O= 110
+D = 90, D EX = 170
+ISIS = 115
+
+BGPP*******
+!@I1 - CONVERGE
+conf t
+ router bgp 45
+  bgp log-neighbor-changes
+  neighbor 24.2.4.2 remote-as 2
+  neighbor 45.4.5.5 remote-as 45
+  neighbor 208.8.8.1 remote-as 1
+  address-family ipv4
+   neighbor 24.2.4.2 activate
+   neighbor 45.4.5.5 activate
+   neighbor 208.8.8.1 activate
+   network 208.8.8.0 mask 255.255.255.0
+   network 24.2.4.0 mask 255.255.255.0
+   network 44.44.44.44 mask 255.255.255.255
+   network 45.4.5.0 mask 255.255.255.0
+   end
+show bgp summary
+
+
+**DEFAULT ROUTE INJECTION***
+GATEWAY
+### NAT private to public
+Step 1: Define INSIDE and OUTSIDE
+!@R1
+
+conf t
+ int range e1/1-3
+  ip nat outside
+  exit
+ int e1/0
+  ip nat inside
+  end
+RIP = 120
+
+
+
+
+
+
+

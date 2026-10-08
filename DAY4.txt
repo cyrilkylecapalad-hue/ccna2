@@ -1,0 +1,86 @@
+conf t
+ no ip access-list extended FWP4
+ ip access-list extended FWP4
+ permit tcp Any host www.bet100.com eq 80log
+ permit tcp Any host www.bet100.com eq 443 log
+ permit icmp Any host www.bet100.com log
+ permit tcp Any host www.bet100.com eq 22 log
+ permit tcp Any host www.bet100.com eq 53 log
+ Int gi 1
+  no ip access-group FWP4 in
+  end
+
+conf t
+ no ip access-list extended FWP5
+ ip access-list extended FWP5
+ permit tcp Any host www.bet100.com eq 143log -imap
+ permit tcp Any host www.bet100.com eq 5060 log -sip
+ permit icmp Any host www.bet100.com 2000 log sccp
+ permit tcp Any host www.bet100.com eq 25 log smtp
+ permit tcp Any host www.bet100.com eq 21 log ftp
+ permit tcp Any host www.bet100.com eq 25 log tftp
+ permit tcp Any host www.bet100.com eq 123 log 123 ntp
+ permit tcp Any host www.bet100.com eq 25 log 
+
+ Int gi 1
+  ip access-group FWP5 in
+  end
+
+
+STEP 1 @UTMPH DEFINE IN AND OUT
+conf t 
+ int g1
+ ip nat ousdie
+ int g3 
+ip nat inside
+end
+STEP2 Create an access list to match traffic
+@! UTM PH
+conf t 
+access-list 1 permit any
+end
+
+Step 3 
+UTMPH
+conf t
+ip nat inside source list 1 int g1 overload
+
+OVERALL:
+@UTMPH
+conf t 
+ int g1
+ ip nat outside
+ int g3 
+ip nat inside
+access-list 1 permit any
+ip nat inside source list 1 int g1 overload
+end
+
+sudo su
+hostname WEB1
+ifconfig eth0 10.11.11.101 netmask 255.255.255.224 up
+route add default gw 10.11.11.113
+ping 10.11.11.113
+
+sudo su
+hostname WEB2
+ifconfig eth0 10.11.11.102 netmask 255.255.255.224 up
+route add default gw 10.11.11.113
+ping 10.11.11.113
+
+
+conf t
+ ip nat inside source static tcp 10.11.11.101 444 208.8.8.105 8444
+ip nat inside source static tcp 10.11.11.102 443 208.8.8.105 8443
+ip nat inside source static tcp 10.11.11.101 444 208.8.8.105 444
+ip nat inside source static tcp 10.11.11.102 443 208.8.8.105 443
+end
+show command
+sh ip nat translations
+
+10.11.11.101 22 => 208.8.8.105 __
+10.11.11.102 22 => 208.8.8.105 __
+
+conf t
+ip nat inside source static tcp 10.11.11.101 22 208.8.8.105 1701
+ip nat inside source static tcp 10.11.11.102 22 208.8.8.105 1702
